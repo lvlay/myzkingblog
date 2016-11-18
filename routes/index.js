@@ -4,7 +4,7 @@ var router = express.Router();
 
 /* 指向首页*/
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'zking博客' });
+  res.render('index', { title: 'zking博客'});
 });
 
 module.exports = router;
