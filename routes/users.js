@@ -23,7 +23,8 @@ router.post('/reg',auth.checkNotLogin,function (req,res,next) {
           models.User.findOne({username:user.username},function (err,doc) {
               if(doc)
               {//如果有值,用户名已存在
-
+                  req.flash('error','用户名已存在请重新注册');
+                  res.redirect('/users/reg');
               }else
               {
                   //没有值才能够注册
@@ -34,10 +35,12 @@ router.post('/reg',auth.checkNotLogin,function (req,res,next) {
                           email:user.email}, function (err,doc) {
                           if(err)
                           {
-
+                              req.flash('error','注册失败,请稍后再试');
+                              res.redirect('/users/reg');
                           }else
                           {
                               //注册成功,重定向到登陆页面
+                              req.flash('success','注册成功请登陆');
                               res.redirect("/users/login");
                           }
 
@@ -47,6 +50,8 @@ router.post('/reg',auth.checkNotLogin,function (req,res,next) {
       }else
       {
           //2次密码不一致
+          req.flash('error','密码和确认密码不一致');
+          res.redirect('/users/reg');
       }
 });
 
@@ -66,11 +71,21 @@ router.post('/login',auth.checkNotLogin, function(req, res, next) {
           {
               //若果doc存在,那么就是登陆成功
               //登陆成功后,将用户的信息放入session保存
+
               req.session.user = doc;
+            //重定向  是由服务器端向客户端浏览器发出状态是301/302的响应码 告诉客户端浏览器要发出新的请求,地址是 "/"也就是网站的根目录
+              //  A页面--->B页面--->C页面
+              //转发  forward
+              // A页面---》B页面---》c页面
+
+              //放入成功的消息
+              req.flash("success",'登陆成功');
               res.redirect("/");
           }else
           {
               //如果doc不存在,那么就是登陆失败
+              //放入失败的消息
+              req.flash("error",'登陆失败,用户名或密码错');
               res.redirect("/users/login");
           }
 
