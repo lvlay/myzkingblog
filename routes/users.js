@@ -1,8 +1,26 @@
 var express = require('express');
 var models = require("../db/model");
+var path = require('path');
 var router = express.Router();
 var utils= require('../utils');
+var multer = require('multer');
 var auth = require('../middleware/autoauth');
+
+
+var storage = multer.diskStorage({
+    //设定上传文件的保存路径
+    destination: function (req, file, cb) {
+        cb(null, '../public/uploads')
+    },
+    //设定上传文件的文件名
+    filename: function (req, file, cb) {
+        console.log(file);
+        cb(null, Date.now()+'.'+file.mimetype.slice(file.mimetype.indexOf('/')+1))
+    }
+})
+
+var upload = multer({ storage:storage});
+
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -15,7 +33,8 @@ router.get('/reg',auth.checkNotLogin, function(req, res, next) {
 
 //路径与上面访问注册页面的路径是一致的,只是动作是post
 //这种设计即是RESTful设计原则
-router.post('/reg',auth.checkNotLogin,function (req,res,next) {
+//上传头像必须要加upload.single中间件  single方法处理上传单个文件,其参数是表单中file input框的name属性值
+router.post('/reg',auth.checkNotLogin,upload.single('avatar'),function (req,res,next) {
     //获取表单数据
       var user = req.body;
       if(user.pwd === user.pwd2)
@@ -27,13 +46,26 @@ router.post('/reg',auth.checkNotLogin,function (req,res,next) {
                   res.redirect('/users/reg');
               }else
               {
+
+                  //查看头像是否有值
+                  if(req.file)
+                  {
+                      console.log(req.file);
+                      //如果存在则文件上传成功
+                     user.avater = path.join('/uploads',req.file.filename);
+                  }else
+                  {
+                      //如果没有上传头像 则用email地址的头像
+                      user.avater =  'https://s.gravatar.com/avatar/'+utils.md5(user.email)+'?s=40'
+                  }
+
                   //没有值才能够注册
                   models.User.create(
                       //脱库攻击
                       {username:user.username,
                           password:utils.md5(user.pwd),
                           email:user.email,
-                          avatar:'https://s.gravatar.com/avatar/'+utils.md5(user.email)+'?s=40'}, function (err,doc) {
+                          avatar:user.avater}, function (err,doc) {
                           if(err)
                           {
                               req.flash('error','注册失败,请稍后再试');

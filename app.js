@@ -45,6 +45,7 @@ app.use(flash());
 //可以添加一个中间件,专门处理session的问题
 app.use(function (req, resp, next) {
     resp.locals.myuser = req.session.user;
+//    resp.locals.keyword= req.session.keyword;
     resp.locals.success = req.flash('success');
     resp.locals.error = req.flash('error');
     next();

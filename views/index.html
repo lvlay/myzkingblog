@@ -13,8 +13,10 @@
     <img src="<%= art.user.avatar%>" alt="">
   </a>
   <div class="media-body">
-    <h4 class="media-heading"><%=art.title%></h4>
-      <%=art.content%>
+    <h4 class="media-heading"><a href="/article/detail/<%=art._id%>"><%=art.title%></a></h4>
+      <%-art.content%>
+    <p>作者:<%=art.user.username%> 发布时间:<%=art.createTime.toLocaleString()%><p>
+
   </div>
 </div>
 
@@ -22,6 +24,64 @@
    });
 %>
 
+
+<nav>
+  <ul class="pagination">
+    <%
+    //如果是第一页就禁用向左
+        if(pageNum==1)
+        {
+
+    %>
+    <li class="disabled"><span>&laquo;</span></li>
+
+    <%
+         }else
+         {
+         %>
+    <li><a href="/article/list/<%=(pageNum-1)%>/<%=pageSize%>">&laquo;</a></li>
+
+    <%
+         }
+    %>
+<%
+    //jade
+    //求出一共有多少页
+     var total =  Math.ceil(count/pageSize);
+    for(var i=1;i<=total;i++)
+    {
+       if(i==pageNum)
+       {
+    %>
+    <li  class="active"><a href="/article/list/<%=i%>/<%=pageSize%>"  ><%=i%></a></li>
+    <%
+        }else
+       {
+    %>
+        <li><a href="/article/list/<%=i%>/<%=pageSize%>"  ><%=i%></a></li>
+    <%
+        }
+      }
+    %>
+    <%
+       if(pageNum==total)
+       {
+    //如果是最后一页就禁用向右
+
+     %>
+    <li class="disabled"><span>&raquo;</span></li>
+
+    <%
+       }else
+       {
+    %>
+    <li><a href="/article/list/<%=(pageNum+1)%>/<%=pageSize%>">&raquo;</a></li>
+
+    <%
+      }
+    %>
+  </ul>
+</nav>
 
 
   </body>
